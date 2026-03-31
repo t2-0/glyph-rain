@@ -1,0 +1,87 @@
+﻿#include "Glyphs.h"
+#include <stdlib.h>  
+#include <iostream>
+
+float Glyph::rotation = 0.0f;
+Font Glyph::font;
+
+using namespace std;
+
+void Glyph::draw(Vector2 position) const {
+	DrawTextPro(font, c, position, { 0, 0 }, rotation, font.baseSize, 0.0f, glyph_color);
+}
+
+void Glyph::update(float global_speed) {
+	float dt = GetFrameTime();
+	timer += dt * global_speed;
+
+	if (timer >= interval) {
+		int codepoint = GetRandomValue(65, 90);
+
+		int utf8Size = 0;
+		char utf8 = *CodepointToUTF8(codepoint, &utf8Size);
+
+		c[0] = { utf8 };
+
+		timer = 0.0f;
+		interval = 0.05f + (GetRandomValue(0, 1000) / 1000.0f) * (0.2f - 0.05f);
+	}
+}
+
+GlyphColumn::GlyphColumn(int size, Vector2 position, Font font) {
+	this->position = position;
+	speed = GetRandomValue(200, 350);
+	Color column_color = GREEN;
+
+	float alpha_offset = 255.0f / size;
+	float head_region = 0.2f;
+	float tail_region = 1.0f - head_region;
+
+	for (int i = 0; i < size; i++) {
+		int codepoint = GetRandomValue(65, 90);
+
+		int utf8Size = 0;
+		char utf8 = *CodepointToUTF8(codepoint, &utf8Size);
+
+		Color glyph_color;
+		float t = i / (size - 1.0f);
+		if (t > tail_region) {
+			float factor = (t - tail_region) / head_region;
+
+			glyph_color.r = column_color.r + (255.0f - column_color.r) * factor;
+			glyph_color.g = column_color.g + (255.0f - column_color.g) * factor;
+			glyph_color.b = column_color.b + (255.0f - column_color.b) * factor;
+			glyph_color.a = 255.0f;
+		}
+		else {
+			glyph_color = column_color;
+			glyph_color.a = alpha_offset * i;
+		}
+
+		column.push_back(Glyph { utf8, glyph_color });
+	}
+
+	y_offset = MeasureTextEx(font, "A", font.baseSize, 0.0f).y; // "A"?
+}
+
+void GlyphColumn::draw() {
+	Vector2 glyph_position = position;
+
+	for (int i = 0; i < column.size(); i++) {
+		column[i].draw(glyph_position);
+		glyph_position.y += y_offset;
+	}
+}
+
+void GlyphColumn::update(const GUI& gui) {
+	float dt = GetFrameTime();
+	position.y += speed * dt * gui.get_column_speed();
+	if (position.y > GetScreenHeight()) {
+		position.x = GetRandomValue(20, GetScreenWidth() - 20);
+		position.y = -(column.size() * y_offset);
+	}
+
+	for (int i = 0; i < column.size(); i++) {
+		column[i].update(gui.get_glyph_speed());
+	}
+}
