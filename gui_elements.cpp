@@ -1,6 +1,8 @@
 #include "gui_elements.h"
 #include <iostream>
 
+using namespace std;
+
 Font TextEx::font;
 
 IntBox::IntBox(Rectangle bounds, string text, int min_val, int max_val, int val = 0) :
@@ -46,4 +48,45 @@ ScrollBar::ScrollBar(Rectangle bounds, float min_scroll, float font_size, size_t
 
 void ScrollBar::draw() {
 	scroll_val = GuiScrollBarW(bounds, scroll_val, min_scroll, max_scroll);
+}
+
+ColorGroup::ColorGroup(Rectangle toggle_bounds, float offset_x, float offset_y, vector<Color> colors, int toggles_per_row, int active) {
+	this->active = active;
+	active_new   = active;
+	float base_x = toggle_bounds.x;
+
+	if (toggles_per_row <= 0) { toggles_per_row = 1; }
+	for (int i = 0; i < colors.size(); i++) {
+		toggles.push_back({ toggle_bounds, colors[i] });
+
+		toggle_bounds.x += toggle_bounds.width + offset_x;
+		if ((i + 1) % toggles_per_row == 0) {
+			toggle_bounds.y += toggle_bounds.height + offset_y;
+			toggle_bounds.x = base_x;
+		}
+	}
+
+	if (!toggles.empty()) { toggles[active].set_active(true); }
+}
+
+void ColorGroup::update() {
+	toggles[active].set_active(false);
+	toggles[active].update();
+
+	active = active_new;
+	toggles[active].set_active(true);
+	toggles[active].update();
+}
+
+bool ColorGroup::is_updated() {
+	bool updated = false;
+	for (int i = 0; i < toggles.size(); i++) {
+		if (toggles[i].is_updated()) {
+			active_new = i;
+			updated = true;
+			break;
+		}
+	}
+
+	return updated;
 }

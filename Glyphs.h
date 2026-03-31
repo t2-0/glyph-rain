@@ -36,6 +36,5 @@ private:
 	float y_offset = 0.0f;
 	float speed = 0.0f;
 
-	static Color column_color;
 	static float head_region;
 };

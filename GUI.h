@@ -9,11 +9,20 @@ using namespace std;
 using std::unique_ptr;
 using std::make_unique;
 
+struct StyleEntry {
+	StyleEntry(int control, int property, Color color) : control{ control }, property{ property }, color{ color } { }
+
+	int control;
+	int property;
+	Color color;
+};
+
 class GUI {
 public:
 	GUI();
 
 	void draw();
+	void update();
 
 	float get_column_speed() const { return column_speed.get()->get_val(); }
 	float get_glyph_speed()  const { return glyph_speed.get()->get_val(); }
@@ -29,4 +38,8 @@ private:
 
 	unique_ptr<TextEx> head_text;
 	unique_ptr<Slider> head_region;
+
+	unique_ptr <ColorGroup> colors;
+
+	vector<vector<StyleEntry>> style_colors;
 };

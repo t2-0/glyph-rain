@@ -1,8 +1,10 @@
 #pragma once
 #include "raylib_raygui.h"
 #include <string>
+#include <vector>
 
 using std::string;
+using std::vector;
 
 class IntBox {
 public:
@@ -203,4 +205,53 @@ public:
 private:
 	Rectangle bounds;
 	const char *text;
+};
+
+class ColorToggle {
+public:
+	ColorToggle(Rectangle bounds, Color color) : bounds{ bounds }, color{ color } {
+		color_bounds = { 
+			bounds.x + bounds.width * 0.2f, 
+			bounds.y + bounds.height * 0.2f, 
+			bounds.width * 0.6f, 
+			bounds.height * 0.6f };
+	}
+
+	void draw() { 
+		if (GuiToggle(bounds, nullptr, &active)) { active = !active; }
+		DrawRectangleRec(color_bounds, color);
+	}
+
+	bool is_active() { return active; }
+	bool is_updated() { return active != active_old; }
+	void update() { active_old = active; }
+
+	void set_active(bool active) { this->active = active; }
+
+	Color get_color() { return color; }
+private:
+	Rectangle bounds;
+	Rectangle color_bounds;
+	Color color;
+
+	bool active = false;
+	bool active_old = false;
+};
+
+class ColorGroup {
+public:
+	ColorGroup(Rectangle toggle_bounds, float offset_x, float offset_y, vector<Color> colors, int toggles_per_row = 1, int active = 0);
+
+	void draw() { for (ColorToggle& ct : toggles) { ct.draw(); } }
+	void update();
+
+	bool is_updated();
+
+	Color get_active_color() { return toggles[active].get_color(); }
+	int get_active() { return active; }
+private:
+	vector<ColorToggle> toggles;
+	int active;
+
+	int active_new;
 };

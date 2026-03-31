@@ -5,7 +5,6 @@
 float Glyph::rotation = 0.0f;
 Font Glyph::font;
 
-Color GlyphColumn::column_color = GREEN;
 float GlyphColumn::head_region = 0.2f;
 
 using namespace std;
@@ -48,6 +47,8 @@ GlyphColumn::GlyphColumn(int size, Vector2 position, Font font) {
 }
 
 void GlyphColumn::draw() {
+	Color column_color = GetColor(GuiGetStyle(DEFAULT, TEXT_COLOR_NORMAL));
+
 	Vector2 glyph_position = position;
 	float alpha_offset = 255.0f / column.size();
 	float tail_region = 1.0f - head_region;

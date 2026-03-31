@@ -61,6 +61,7 @@ int main() {
     SetTargetFPS(60);
     float* val = new float(1.0f);
     while (!WindowShouldClose()) {
+        gui.update();
         BeginDrawing();
         ClearBackground(BLACK);
 
