@@ -5,10 +5,13 @@
 float Glyph::rotation = 0.0f;
 Font Glyph::font;
 
+Color GlyphColumn::column_color = GREEN;
+float GlyphColumn::head_region = 0.2f;
+
 using namespace std;
 
-void Glyph::draw(Vector2 position) const {
-	DrawTextPro(font, c, position, { 0, 0 }, rotation, font.baseSize, 0.0f, glyph_color);
+void Glyph::draw(Vector2 position, Color color) const {
+	DrawTextPro(font, c, position, { 0, 0 }, rotation, font.baseSize, 0.0f, color);
 }
 
 void Glyph::update(float global_speed) {
@@ -31,11 +34,6 @@ void Glyph::update(float global_speed) {
 GlyphColumn::GlyphColumn(int size, Vector2 position, Font font) {
 	this->position = position;
 	speed = GetRandomValue(200, 350);
-	Color column_color = GREEN;
-
-	float alpha_offset = 255.0f / size;
-	float head_region = 0.2f;
-	float tail_region = 1.0f - head_region;
 
 	for (int i = 0; i < size; i++) {
 		int codepoint = GetRandomValue(65, 90);
@@ -43,8 +41,21 @@ GlyphColumn::GlyphColumn(int size, Vector2 position, Font font) {
 		int utf8Size = 0;
 		char utf8 = *CodepointToUTF8(codepoint, &utf8Size);
 
+		column.push_back(Glyph { utf8 });
+	}
+
+	y_offset = MeasureTextEx(font, "A", font.baseSize, 0.0f).y; // "A"?
+}
+
+void GlyphColumn::draw() {
+	Vector2 glyph_position = position;
+	float alpha_offset = 255.0f / column.size();
+	float tail_region = 1.0f - head_region;
+
+	for (int i = 0; i < column.size(); i++) {
 		Color glyph_color;
-		float t = i / (size - 1.0f);
+
+		float t = i / (column.size() - 1.0f);
 		if (t > tail_region) {
 			float factor = (t - tail_region) / head_region;
 
@@ -58,17 +69,7 @@ GlyphColumn::GlyphColumn(int size, Vector2 position, Font font) {
 			glyph_color.a = alpha_offset * i;
 		}
 
-		column.push_back(Glyph { utf8, glyph_color });
-	}
-
-	y_offset = MeasureTextEx(font, "A", font.baseSize, 0.0f).y; // "A"?
-}
-
-void GlyphColumn::draw() {
-	Vector2 glyph_position = position;
-
-	for (int i = 0; i < column.size(); i++) {
-		column[i].draw(glyph_position);
+		column[i].draw(glyph_position, glyph_color);
 		glyph_position.y += y_offset;
 	}
 }
@@ -76,6 +77,8 @@ void GlyphColumn::draw() {
 void GlyphColumn::update(const GUI& gui) {
 	float dt = GetFrameTime();
 	position.y += speed * dt * gui.get_column_speed();
+	head_region = gui.get_head_region();
+
 	if (position.y > GetScreenHeight()) {
 		position.x = GetRandomValue(20, GetScreenWidth() - 20);
 		position.y = -(column.size() * y_offset);

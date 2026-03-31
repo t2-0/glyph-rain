@@ -16,7 +16,8 @@ public:
 	void draw();
 
 	float get_column_speed() const { return column_speed.get()->get_val(); }
-	float get_glyph_speed() const  { return glyph_speed.get()->get_val(); }
+	float get_glyph_speed()  const { return glyph_speed.get()->get_val(); }
+	float get_head_region()  const { return head_region.get()->get_val(); }
 private:
 	unique_ptr<Panel> panel;
 
@@ -25,4 +26,7 @@ private:
 
 	unique_ptr<TextEx> glyph_text;
 	unique_ptr<Slider> glyph_speed;
+
+	unique_ptr<TextEx> head_text;
+	unique_ptr<Slider> head_region;
 };

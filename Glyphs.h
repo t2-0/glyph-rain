@@ -7,9 +7,9 @@ using std::vector;
 
 class Glyph {
 public:
-	Glyph(char c, Color color) : c{ c }, glyph_color{ color } {}
+	Glyph(char c) : c{ c } { }
 
-	void draw(Vector2 position) const;
+	void draw(Vector2 position, Color color) const;
 	void update(float global_speed);
 
 	static void set_rotation(float rotation_n) { rotation = rotation_n; }
@@ -17,7 +17,6 @@ public:
 private:
 	static float rotation;
 	static Font font;
-	Color glyph_color;
 
 	char c[2];
 	float timer = 0.0f;
@@ -36,4 +35,7 @@ private:
 
 	float y_offset = 0.0f;
 	float speed = 0.0f;
+
+	static Color column_color;
+	static float head_region;
 };
