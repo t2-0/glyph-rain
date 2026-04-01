@@ -32,6 +32,7 @@ void Glyph::update(float global_speed) {
 
 GlyphColumn::GlyphColumn(int size, Vector2 position, Font font) {
 	this->position = position;
+	target_size = size;
 	speed = GetRandomValue(200, 350);
 
 	for (int i = 0; i < size; i++) {
@@ -76,16 +77,39 @@ void GlyphColumn::draw() {
 }
 
 void GlyphColumn::update(const GUI& gui) {
+	// per col?
+	if (gui.is_size_updated()) {
+		int max_size = gui.get_max_col_size();
+		int min_size = gui.get_min_col_size();
+
+		int size = GetRandomValue(min_size, max_size);
+		target_size = size;
+	}
+
 	float dt = GetFrameTime();
 	position.y += speed * dt * gui.get_column_speed();
 	head_region = gui.get_head_region();
 
 	if (position.y > GetScreenHeight()) {
+		// smooth resizing
+		if (column.size() < target_size) {
+			for (int i = 0; i < target_size; i++) {
+				int codepoint = GetRandomValue(65, 90);
+				int utf8Size = 0;
+				char utf8 = *CodepointToUTF8(codepoint, &utf8Size);
+				column.push_back({ utf8 });
+			}
+		}
+		else if (column.size() > target_size) {
+			column.erase(column.begin() + target_size, column.end());
+		}
+
 		position.x = GetRandomValue(20, GetScreenWidth() - 20);
 		position.y = -(column.size() * y_offset);
 	}
 
+	float glyph_speed = gui.get_glyph_speed();
 	for (int i = 0; i < column.size(); i++) {
-		column[i].update(gui.get_glyph_speed());
+		column[i].update(glyph_speed);
 	}
 }

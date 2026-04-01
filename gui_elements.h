@@ -124,7 +124,6 @@ public:
 	TextEx(Vector2 pos, string text, Color color) : pos{ pos }, text{ text }, color{ color } { }
 
 	void draw() { DrawTextEx(font, text.c_str(), pos, font.baseSize, 0.0f, color); }
-	void draw(float offset_y) { DrawTextEx(font, text.c_str(), { pos.x, pos.y + offset_y }, font.baseSize, 0.0f, color); }
 
 	void set_text(string text)  { this->text = text; }
 	void set_pos(Vector2 pos)   { this->pos = pos; }
@@ -134,6 +133,7 @@ public:
 	Vector2 get_pos() { return pos; }
 
 	static void set_font(Font font_n) { font = font_n; }
+	static Font get_font() { return font; }
 private:
 	string text;
 	Vector2 pos;
@@ -184,10 +184,14 @@ class Slider {
 public:
 	Slider(Rectangle bounds, string text_left, string text_right, float val, float min_val, float max_val) : 
 		bounds{ bounds }, text_left{ text_left }, text_right{ text_right }, val{ val }, min_val{ min_val }, max_val{ max_val } 
-		{ }
+	{ old_val = val; }
 	void draw() { GuiSlider(bounds, text_left.c_str(), text_right.c_str(), &val, min_val, max_val); }
-
+	
 	float get_val() { return val; }
+	void set_val(float val) { this->val = val; }
+
+	bool is_updated() { return val != old_val; }
+	void update()	  { old_val = val; }
 private:
 	Rectangle bounds;
 	string text_left;
@@ -196,6 +200,8 @@ private:
 	float val;
 	float min_val;
 	float max_val;
+
+	float old_val;
 };
 
 class Panel {
@@ -254,4 +260,26 @@ private:
 	int active;
 
 	int active_new;
+};
+
+class RangeSlider {
+public:
+	RangeSlider(Rectangle bounds, string text_left, string text_right, float min_val, float max_val);
+
+	void draw();
+	bool is_updated() { return updated; }
+	void update() { updated = false; }
+
+	void set_text_color(Color color) { range->set_color(color); }
+
+	float get_min() { return min_slider->get_val(); }
+	float get_max() { return max_slider->get_val(); }
+
+	~RangeSlider();
+private:
+	TextEx* range = nullptr;
+	Slider* min_slider = nullptr;
+	Slider* max_slider = nullptr;
+
+	bool updated = false;
 };

@@ -1,6 +1,7 @@
 ﻿#include "raylib_raygui.h"
 #include "GUI.h"
 #include "Glyphs.h"
+#include <list>
 
 // function from example
 void AddCodepointRange(Font* font, const char* fontPath, int start, int stop) {
@@ -47,8 +48,8 @@ int main() {
     Glyph::set_font(font);
     TextEx::set_font(GuiGetFont());
 
-    vector<GlyphColumn> cols;
-    for (int i = 0; i < 100; i++) {
+    list<GlyphColumn> cols;
+    for (int i = 0; i < 150; i++) {
         int size = GetRandomValue(20, 40);
         int pos_x = GetRandomValue(20, GetScreenWidth() - 20);
         int pos_y = GetRandomValue(20, GetScreenHeight() - 20);
@@ -59,17 +60,39 @@ int main() {
     GUI gui;
 
     SetTargetFPS(60);
-    float* val = new float(1.0f);
     while (!WindowShouldClose()) {
         gui.update();
+        int target_amount = gui.get_cols_amount();
+        if (target_amount > cols.size()) {
+            int size = GetRandomValue(gui.get_min_col_size(), gui.get_max_col_size());
+            int pos_x = GetRandomValue(20, GetScreenWidth() - 20);
+            int pos_y = GetScreenHeight();
+
+            Vector2 position = { pos_x, pos_y };
+            cols.push_back(GlyphColumn{ size, position, font });
+        }
+        else if (target_amount < cols.size()) {
+            for (auto it = cols.begin(); it != cols.end();) {
+                // 0, 1 -> to_del == 66% 
+                int to_del = GetRandomValue(0, 2);
+                if (it->out_of_height() && to_del >= 1) {
+                    it = cols.erase(it);
+                }
+                else {
+                    it++;
+                }
+            }
+        }
+
         BeginDrawing();
         ClearBackground(BLACK);
 
         gui.draw();
-        for (int i = 0; i < cols.size(); i++) {
-            cols[i].update(gui);
-            cols[i].draw();
+        for (auto it = cols.begin(); it != cols.end(); it++) {
+            it->update(gui);
+            it->draw();
         }
+        gui.update_size();
 
         EndDrawing();
     }

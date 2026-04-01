@@ -90,3 +90,76 @@ bool ColorGroup::is_updated() {
 
 	return updated;
 }
+
+RangeSlider::RangeSlider(Rectangle bounds, string text_left, string text_right, float min_val, float max_val) {
+	int min_val_i = min_val;
+	int max_val_i = max_val;
+
+	string text = "[ ";
+	text += to_string(min_val_i);
+	text += " ... ";
+	text += to_string(max_val_i);
+	text += " ]";
+
+	Font font = TextEx::get_font();
+	Vector2 text_size = MeasureTextEx(font, text.c_str(), font.baseSize, 0.0f);
+
+	Vector2 text_pos = { int(bounds.x + text_size.x / 2.0f), bounds.y};
+	range = new TextEx{ text_pos, text, WHITE };
+
+	bounds.y += bounds.height + int(text_size.y / 4.0f);
+	min_slider = new Slider{ bounds, text_left, text_right, min_val, min_val, max_val };
+
+	bounds.y += bounds.height + bounds.height / 2.0f;
+	max_slider = new Slider{ bounds, text_left, text_right, max_val, min_val, max_val };
+}
+
+RangeSlider::~RangeSlider() {
+	delete range;
+	delete min_slider;
+	delete max_slider;
+}
+
+void RangeSlider::draw() {
+	if (min_slider->is_updated()) {
+		updated = true;
+		int min_val = min_slider->get_val();
+		int max_val = max_slider->get_val();
+
+		if (max_val < min_val) {
+			max_slider->set_val(min_val);
+		}
+
+		string text = "[ ";
+		text += to_string(min_val);
+		text += " ... ";
+		text += to_string(max_val);
+		text += " ]";
+		range->set_text(text);
+
+		min_slider->update();
+	}
+
+	if (max_slider->is_updated()) {
+		updated = true;
+		int min_val = min_slider->get_val();
+		int max_val = max_slider->get_val();
+
+		if (min_val > max_val) {
+			min_slider->set_val(max_val);
+		}
+
+		string text = "[ ";
+		text += to_string(min_val);
+		text += " ... ";
+		text += to_string(max_val);
+		text += " ]";
+		range->set_text(text);
+
+		max_slider->update();
+	}
+
+	range->draw();
+	min_slider->draw();
+	max_slider->draw();
+}

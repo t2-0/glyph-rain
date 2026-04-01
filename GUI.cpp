@@ -1,9 +1,9 @@
 #include "GUI.h"
 
-float get_text_x(float slider_x, float slider_width, string text) {
-	Font font = GetFontDefault();// t
-	float text_width = MeasureTextEx(font, text.c_str(), font.baseSize, 1.0f).x;
-	return round(slider_x + slider_width / 2.0f - text_width / 2.0f);
+int get_text_x(float slider_x, float slider_width, string text) {
+	Font font = TextEx::get_font();
+	float text_width = MeasureTextEx(font, text.c_str(), font.baseSize, 0.0f).x;
+	return int(slider_x + slider_width / 2.0f - text_width / 2.0f);
 }
 
 Color get_styled_color(Color style_color, Color color) {
@@ -18,7 +18,6 @@ Color get_styled_color(Color style_color, Color color) {
 	else {
 		color_custom = ColorFromHSV(in_hsv.x, style_hsv.y, style_hsv.z);
 	}
-
 
 	return color_custom;
 }
@@ -37,7 +36,7 @@ GUI::GUI() {
 	float slider_x = screen_width - (slider_width + (panel_width - slider_width) / 2.0f);
 	float text_x = get_text_x(slider_x, slider_width, text);
 
-	column_text = make_unique<TextEx>(Vector2{ text_x, 30 }, text, text_color);
+	column_speed_text = make_unique<TextEx>(Vector2{ text_x, 30 }, text, text_color);
 	column_speed = make_unique<Slider>(Rectangle{ slider_x, 50, slider_width, 20 }, "0.0", "2.0", 1.0f, 0.0f, 2.0f);
 
 	text = "Glyph Speed";
@@ -52,6 +51,18 @@ GUI::GUI() {
 	head_text = make_unique<TextEx>(Vector2{ text_x, 150 }, text.c_str(), text_color);
 	head_region = make_unique<Slider>(Rectangle{ slider_x, 170, 120, 20 }, "0.0", "1.0", 0.5f, 0.0f, 1.0f);
 
+	text = "Amount of Columns";
+	text_x = get_text_x(slider_x, slider_width, text);
+
+	column_amount_text = make_unique<TextEx>(Vector2{ text_x, 210 }, text.c_str(), text_color);
+	column_amount = make_unique<Slider>(Rectangle{ slider_x, 230, 120,20 }, "10", "300", 155.0f, 10.0f, 300.0f);
+
+	text = "Column Size";
+	text_x = get_text_x(slider_x, slider_width, text);
+
+	column_size_text = make_unique<TextEx>(Vector2{ text_x, 270 }, text.c_str(), text_color);
+	column_size = make_unique<RangeSlider>(Rectangle{ slider_x, 290, 120,20 }, "2", "100", 2.0f, 100.0f);
+
 	Color style_color = GetColor(GuiGetStyle(DEFAULT, TEXT_COLOR_NORMAL));
 	vector<Color> colors_v;
 	vector<Color> colors_orig = { style_color, RED, BLUE, YELLOW, GRAY, PURPLE };
@@ -59,7 +70,6 @@ GUI::GUI() {
 		Color color_custom = get_styled_color(style_color, colors_orig[i]);
 		colors_v.push_back(color_custom);
 	}
-
 	colors = make_unique<ColorGroup>(Rectangle{ slider_x, screen_height * 0.86f, 30.0f, 30.0f }, 15.0f, 10.0f, colors_v, 3, 1);
 	
 	for (int i = 0; i < colors_v.size(); i++) {
@@ -107,32 +117,41 @@ GUI::GUI() {
 }
 
 void GUI::draw() {
-	panel.get()->draw();
+	panel->draw();
 
-	column_text.get()->draw();
-	column_speed.get()->draw();
+	column_speed_text->draw();
+	column_speed->draw();
 
-	glyph_text.get()->draw();
-	glyph_speed.get()->draw();
+	glyph_text->draw();
+	glyph_speed->draw();
 
-	head_text.get()->draw();
-	head_region.get()->draw();
+	head_text->draw();
+	head_region->draw();
 
-	colors.get()->draw();
+	column_size_text->draw();
+	column_size->draw();
+
+	column_amount_text->draw();
+	column_amount->draw();
+
+	colors->draw();
 }
 
 void GUI::update() {
-	if (colors.get()->is_updated()) {
-		colors.get()->update();
-		Color color_active = colors.get()->get_active_color();
-		int active = colors.get()->get_active();
+	if (colors->is_updated()) {
+		colors->update();
+		Color color_active = colors->get_active_color();
+		int active = colors->get_active();
 
 		for (int i = 0; i < style_colors[active].size(); i++) {
 			GuiSetStyle(style_colors[active][i].control, style_colors[active][i].property, ColorToInt(style_colors[active][i].color));
 		}
-		
-		column_text.get()->set_color(color_active);
-		glyph_text.get()->set_color(color_active);
-		head_text.get()->set_color(color_active);
+
+		column_speed_text->set_color(color_active);
+		glyph_text->set_color(color_active);
+		head_text->set_color(color_active);
+		column_amount_text->set_color(color_active);
+		column_size_text->set_color(color_active);
+		column_size->set_text_color(color_active);
 	}
 }

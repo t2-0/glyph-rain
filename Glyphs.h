@@ -29,12 +29,15 @@ public:
 
 	void draw();
 	void update(const GUI& gui);
+	// (position.y + (column.size() * y_offset)) == head pos
+	bool out_of_height() { return (position.y + (column.size() * y_offset)) <= 0.0f; }
 private:
 	vector<Glyph> column;
 	Vector2 position;
 
 	float y_offset = 0.0f;
 	float speed = 0.0f;
+	int target_size;
 
 	static float head_region;
 };
