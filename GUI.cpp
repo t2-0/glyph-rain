@@ -1,4 +1,6 @@
-#include "GUI.h"
+#include "Gui.h"
+#include "utils.h"
+#include "win32_dialog.h"
 
 int get_text_x(float slider_x, float slider_width, string text) {
 	Font font = TextEx::get_font();
@@ -22,46 +24,105 @@ Color get_styled_color(Color style_color, Color color) {
 	return color_custom;
 }
 
-GUI::GUI() {
+GlyphImagePreview::GlyphImagePreview(Rectangle bounds) : bounds{ bounds } {
+	float pos_x = bounds.x + bounds.width * 0.1f;
+	float pos_y = bounds.y + bounds.height * 0.1f;
+	position = { pos_x, pos_y };
+
+	float width = bounds.width * 0.8f;
+	float height = bounds.height * 0.8f;
+	size = { width, height };
+}
+
+void GlyphImagePreview::draw() {
+	Color color_rec = GetColor(GuiGetStyle(BUTTON, BASE_COLOR_NORMAL));
+	Color color_lines = GetColor(GuiGetStyle(BUTTON, BORDER_COLOR_NORMAL));
+	Color color_circle = GetColor(GuiGetStyle(DEFAULT, TEXT_COLOR_NORMAL));
+
+	DrawRectangleRec(bounds, color_rec);
+	DrawRectangleLinesEx(bounds, 1.0f, color_lines);
+	for (auto [x, y] : points) {
+		DrawCircle(x, y, 1.0f, color_circle);
+	}
+}
+
+void GlyphImagePreview::update_points() {
+	HWND hwnd = (HWND)GetWindowHandle();
+	file_name = load_file(hwnd);
+
+	Image image = LoadImage(file_name.c_str());
+	ImageResize(&image, size.x, size.y);
+
+	points.clear();
+	int step = 3;
+	Color* pixels = LoadImageColors(image);
+	for (int y = 0; y < image.height; y += step) {
+		for (int x = 0; x < image.width; x += step) {
+			Color c = pixels[y * image.width + x];
+			float brightness = 0.299f * c.r + 0.587f * c.g + 0.114f * c.b;
+
+			if (brightness > 128.0f) {
+				points.push_back({ position.x + x, position.y + y });
+			}
+		}
+	}
+	UnloadImageColors(pixels);
+}
+
+Gui::Gui() {
 	float screen_width = GetScreenWidth();
 	float screen_height = GetScreenHeight();
 
 	float panel_width = 220.0f;
-	panel = make_unique<Panel>(Rectangle{ screen_width - panel_width, 0, panel_width, screen_height }, nullptr);
+	panel = make_unique<Panel>(Rectangle{ screen_width - panel_width, 0.0f, panel_width, screen_height }, nullptr);
 
 	string text = "Column Speed";
 	Color text_color = GetColor(GuiGetStyle(LABEL, TEXT_COLOR_NORMAL));
 
-	float slider_width = 120.0f;
+	const float slider_width = 120.0f;
+	const float slider_height = 18.0f;
 	float slider_x = screen_width - (slider_width + (panel_width - slider_width) / 2.0f);
 	float text_x = get_text_x(slider_x, slider_width, text);
 
-	column_speed_text = make_unique<TextEx>(Vector2{ text_x, 30 }, text, text_color);
-	column_speed = make_unique<Slider>(Rectangle{ slider_x, 50, slider_width, 20 }, "0.0", "2.0", 1.0f, 0.0f, 2.0f);
+	column_speed_text = make_unique<TextEx>(Vector2{ text_x, 30.0f }, text, text_color);
+	column_speed = make_unique<Slider<float>>(Rectangle{ slider_x, 50.0f, slider_width, slider_height }, "0.0", "2.0", 1.0f, 0.0f, 2.0f);
 
 	text = "Glyph Speed";
 	text_x = get_text_x(slider_x, slider_width, text);
 
-	glyph_text = make_unique<TextEx>(Vector2{ text_x, 90 }, text.c_str(), text_color);
-	glyph_speed = make_unique<Slider>(Rectangle{ slider_x, 110, 120, 20 }, "0.0", "2.0", 1.0f, 0.0f, 2.0f);
+	glyph_text = make_unique<TextEx>(Vector2{ text_x, 90.0f }, text.c_str(), text_color);
+	glyph_speed = make_unique<Slider<float>>(Rectangle{ slider_x, 110.0f, slider_width, slider_height }, "0.0", "2.0", 1.0f, 0.0f, 2.0f);
 
 	text = "Head Region";
 	text_x = get_text_x(slider_x, slider_width, text);
 
-	head_text = make_unique<TextEx>(Vector2{ text_x, 150 }, text.c_str(), text_color);
-	head_region = make_unique<Slider>(Rectangle{ slider_x, 170, 120, 20 }, "0.0", "1.0", 0.5f, 0.0f, 1.0f);
+	head_text = make_unique<TextEx>(Vector2{ text_x, 150.0f }, text.c_str(), text_color);
+	head_region = make_unique<Slider<float>>(Rectangle{ slider_x, 170.0f, slider_width, slider_height }, "0.0", "1.0", 0.5f, 0.0f, 1.0f);
 
 	text = "Amount of Columns";
 	text_x = get_text_x(slider_x, slider_width, text);
 
-	column_amount_text = make_unique<TextEx>(Vector2{ text_x, 210 }, text.c_str(), text_color);
-	column_amount = make_unique<Slider>(Rectangle{ slider_x, 230, 120,20 }, "10", "300", 155.0f, 10.0f, 300.0f);
+	column_amount_text = make_unique<TextEx>(Vector2{ text_x, 210.0f }, text.c_str(), text_color);
+	column_amount = make_unique<Slider<int>>(Rectangle{ slider_x, 230.0f, slider_width, slider_height }, "10", "200", 105, 10, 200);
 
 	text = "Column Size";
 	text_x = get_text_x(slider_x, slider_width, text);
 
-	column_size_text = make_unique<TextEx>(Vector2{ text_x, 270 }, text.c_str(), text_color);
-	column_size = make_unique<RangeSlider>(Rectangle{ slider_x, 290, 120,20 }, "2", "100", 2.0f, 100.0f);
+	column_size_text = make_unique<TextEx>(Vector2{ text_x, 270.0f }, text.c_str(), text_color);
+	column_size = make_unique<RangeSlider>(Rectangle{ slider_x, 290.0f, slider_width, slider_height }, "2", "100", 2.0f, 100.0f);
+	
+	text = "Input";
+	text_x = get_text_x(slider_x, slider_width, text);
+
+	unique_ptr<Font> merged_font = merge_noto_fonts(16);
+	input_text = make_unique<TextEx>(Vector2{ text_x, 365.0f }, text.c_str(), text_color);
+	input = make_unique<TextBox>(Rectangle{ slider_x - 20.0f, 385.0f, 160.0f, 20.0f }, *merged_font);
+	image_preview = make_unique<GlyphImagePreview>(Rectangle{ slider_x - 20.0f, 415.0f, 160.0f, 160.0f });
+
+	load_btn = make_unique<Button>(Rectangle{ slider_x - 20.0f, 580.0f, 60.0f, 25.0f }, "Load");
+	remove_btn = make_unique<Button>(Rectangle{ slider_x - 20.0f,610.0f, 60.0f,25.0f }, "Remove");
+	fill_btn = make_unique<Button>(Rectangle { slider_x + 80.0f, 580.0f, 60.0f, 25.0f }, "Fill");
+	clear_btn = make_unique<Button>(Rectangle{ slider_x + 80.0f, 610.0f, 60.0f, 25.0f }, "Clear");
 
 	Color style_color = GetColor(GuiGetStyle(DEFAULT, TEXT_COLOR_NORMAL));
 	vector<Color> colors_v;
@@ -72,51 +133,45 @@ GUI::GUI() {
 	}
 	colors = make_unique<ColorGroup>(Rectangle{ slider_x, screen_height * 0.86f, 30.0f, 30.0f }, 15.0f, 10.0f, colors_v, 3, 1);
 	
+	vector<pair<int, int>> style_pairs = { 
+		{ DEFAULT, TEXT_COLOR_NORMAL },
+		{ SLIDER, BORDER_COLOR_NORMAL },
+		{ SLIDER, BASE_COLOR_PRESSED },
+		{ SLIDER, BORDER_COLOR_PRESSED },
+		{ SLIDER, TEXT_COLOR_PRESSED },
+		{ LABEL, TEXT_COLOR_PRESSED },
+		{ TOGGLE, BORDER_COLOR_NORMAL },
+		{ TOGGLE, BORDER_COLOR_PRESSED },
+		{ TOGGLE, BASE_COLOR_PRESSED },
+		{ TOGGLE, BASE_COLOR_FOCUSED },
+		{ DEFAULT, BACKGROUND_COLOR },
+		{ TEXTBOX, BORDER_COLOR_NORMAL },
+		{ TEXTBOX, BORDER_COLOR_PRESSED },
+		{ TEXTBOX, BASE_COLOR_PRESSED },
+		{ TEXTBOX, BASE_COLOR_NORMAL },
+		{ TEXTBOX, BASE_COLOR_PRESSED },
+		{ BUTTON, BASE_COLOR_FOCUSED },
+		{ BUTTON, BASE_COLOR_PRESSED },
+		{ BUTTON, BORDER_COLOR_NORMAL},
+		{ BUTTON, BORDER_COLOR_PRESSED },
+		{ BUTTON, TEXT_COLOR_PRESSED }
+};
+
 	for (int i = 0; i < colors_v.size(); i++) {
 		style_colors.push_back({});
-		style_color = GetColor(GuiGetStyle(DEFAULT, TEXT_COLOR_NORMAL));
-		style_color = get_styled_color(style_color, colors_v[i]);
-		style_colors.back().push_back({DEFAULT, TEXT_COLOR_NORMAL, style_color});
 
-	    style_color = GetColor(GuiGetStyle(SLIDER, BORDER_COLOR_NORMAL));
-		style_color = get_styled_color(style_color, colors_v[i]);
-		style_colors.back().push_back({ SLIDER, BORDER_COLOR_NORMAL, style_color });
+		for (int r = 0; r < style_pairs.size(); r++) {
+			int control = style_pairs[r].first;
+			int property = style_pairs[r].second;
 
-		style_color = GetColor(GuiGetStyle(SLIDER, BASE_COLOR_PRESSED));
-		style_color = get_styled_color(style_color, colors_v[i]);
-		style_colors.back().push_back({ SLIDER, BASE_COLOR_PRESSED, style_color });
-
-		style_color = GetColor(GuiGetStyle(SLIDER, BORDER_COLOR_PRESSED));
-		style_color = get_styled_color(style_color, colors_v[i]);
-		style_colors.back().push_back({ SLIDER, BORDER_COLOR_PRESSED, style_color });
-
-		style_color = GetColor(GuiGetStyle(SLIDER, TEXT_COLOR_PRESSED));
-		style_color = get_styled_color(style_color, colors_v[i]);
-		style_colors.back().push_back({ SLIDER, TEXT_COLOR_PRESSED, style_color });
-
-		style_color = GetColor(GuiGetStyle(LABEL, TEXT_COLOR_PRESSED));
-		style_color = get_styled_color(style_color, colors_v[i]);
-		style_colors.back().push_back({ LABEL, TEXT_COLOR_PRESSED, style_color });
-
-		style_color = GetColor(GuiGetStyle(TOGGLE, BORDER_COLOR_NORMAL));
-		style_color = get_styled_color(style_color, colors_v[i]);
-		style_colors.back().push_back({ TOGGLE, BORDER_COLOR_NORMAL, style_color });
-
-		style_color = GetColor(GuiGetStyle(TOGGLE, BASE_COLOR_PRESSED));
-		style_color = get_styled_color(style_color, colors_v[i]);
-		style_colors.back().push_back({ TOGGLE, BASE_COLOR_PRESSED, style_color });
-
-		style_color = GetColor(GuiGetStyle(TOGGLE, BASE_COLOR_FOCUSED));
-		style_color = get_styled_color(style_color, colors_v[i]);
-		style_colors.back().push_back({ TOGGLE, BASE_COLOR_FOCUSED, style_color });
-
-		style_color = GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR));
-		style_color = get_styled_color(style_color, colors_v[i]);
-		style_colors.back().push_back({ DEFAULT, BACKGROUND_COLOR, style_color });
+			style_color = GetColor(GuiGetStyle(control, property));
+			style_color = get_styled_color(style_color, colors_v[i]);
+			style_colors.back().push_back({ control, property, style_color });
+		}
 	}
 }
 
-void GUI::draw() {
+void Gui::draw() {
 	panel->draw();
 
 	column_speed_text->draw();
@@ -134,10 +189,19 @@ void GUI::draw() {
 	column_amount_text->draw();
 	column_amount->draw();
 
+	input_text->draw();
+	input->draw();
+	image_preview->draw();
+
+	load_btn->draw();
+	remove_btn->draw();
+	fill_btn->draw();
+	clear_btn->draw();
+
 	colors->draw();
 }
 
-void GUI::update() {
+void Gui::update() {
 	if (colors->is_updated()) {
 		colors->update();
 		Color color_active = colors->get_active_color();
@@ -153,5 +217,14 @@ void GUI::update() {
 		column_amount_text->set_color(color_active);
 		column_size_text->set_color(color_active);
 		column_size->set_text_color(color_active);
+		input_text->set_color(color_active);
 	}
+
+	if (load_btn->clicked())   { image_preview->update_points(); }
+	if (remove_btn->clicked()) { image_preview->clear_points(); }
+
+	if (column_speed->is_updated()) { column_speed->update(); }
+	if (glyph_speed->is_updated())  { glyph_speed->update(); }
+	if (head_region->is_updated())  { head_region->update(); }
+	if (column_amount->is_updated()) { column_amount->update(); }
 }

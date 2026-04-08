@@ -180,28 +180,32 @@ private:
 	float scroll_val = 0;
 };
 
+template <typename T>
 class Slider {
 public:
-	Slider(Rectangle bounds, string text_left, string text_right, float val, float min_val, float max_val) : 
-		bounds{ bounds }, text_left{ text_left }, text_right{ text_right }, val{ val }, min_val{ min_val }, max_val{ max_val } 
-	{ old_val = val; }
-	void draw() { GuiSlider(bounds, text_left.c_str(), text_right.c_str(), &val, min_val, max_val); }
-	
-	float get_val() { return val; }
-	void set_val(float val) { this->val = val; }
+	Slider(Rectangle bounds, string text_left, string text_right, T val, T min_val, T max_val) :
+		bounds{ bounds }, text_left{ text_left }, text_right{ text_right }, val{ val }, min_val{ min_val }, max_val{ max_val }
+	{ old_val = val; update(); }
+	void draw();
+
+	T get_val() { return val; }
 
 	bool is_updated() { return val != old_val; }
-	void update()	  { old_val = val; }
+	void update();
+
+	Rectangle get_bounds() { return bounds; }
 private:
 	Rectangle bounds;
+	Vector2 val_pos;
 	string text_left;
 	string text_right;
+	string val_str;
 
-	float val;
-	float min_val;
-	float max_val;
+	T val;
+	T min_val;
+	T max_val;
 
-	float old_val;
+	T old_val;
 };
 
 class Panel {
@@ -264,22 +268,51 @@ private:
 
 class RangeSlider {
 public:
-	RangeSlider(Rectangle bounds, string text_left, string text_right, float min_val, float max_val);
+	RangeSlider(Rectangle bounds, string text_left, string text_right, int min_val_range, int max_val_range);
 
 	void draw();
 	bool is_updated() { return updated; }
 	void update() { updated = false; }
 
+	int get_min() { return min_val; }
+	int get_max() { return max_val; }
+
 	void set_text_color(Color color) { range->set_color(color); }
-
-	float get_min() { return min_slider->get_val(); }
-	float get_max() { return max_slider->get_val(); }
-
-	~RangeSlider();
+	~RangeSlider() { delete range; }
 private:
 	TextEx* range = nullptr;
-	Slider* min_slider = nullptr;
-	Slider* max_slider = nullptr;
+
+	Rectangle bounds_min;
+	Rectangle bounds_max;
+	string text_left;
+	string text_right;
+	int min_val_range;
+	int max_val_range;
+
+	int min_val;
+	int max_val;
+
+	int old_min;
+	int old_max;
 
 	bool updated = false;
+
+	void adjust_text(int min_val, int max_val);
+};
+
+class TextBox {
+public:
+	TextBox(Rectangle bounds, Font font) : bounds{ bounds }, font{ font } {}
+
+	void draw();
+	bool is_active() { return edit_mode; }
+
+	string get_text() { return text; }
+	~TextBox() { UnloadFont(font); }
+private:
+	Rectangle bounds;
+	bool edit_mode = false;
+
+	string text;
+	Font font;
 };

@@ -91,75 +91,178 @@ bool ColorGroup::is_updated() {
 	return updated;
 }
 
-RangeSlider::RangeSlider(Rectangle bounds, string text_left, string text_right, float min_val, float max_val) {
-	int min_val_i = min_val;
-	int max_val_i = max_val;
-
+RangeSlider::RangeSlider(Rectangle bounds, string text_left, string text_right, int min_val_range, int max_val_range) {
 	string text = "[ ";
-	text += to_string(min_val_i);
+	text += to_string(min_val_range);
 	text += " ... ";
-	text += to_string(max_val_i);
+	text += to_string(max_val_range);
 	text += " ]";
+
+	bounds_min = bounds;
+	bounds.y += bounds.height + bounds.height / 2.0f;
+
+	bounds_max = bounds;
 
 	Font font = TextEx::get_font();
 	Vector2 text_size = MeasureTextEx(font, text.c_str(), font.baseSize, 0.0f);
 
-	Vector2 text_pos = { int(bounds.x + text_size.x / 2.0f), bounds.y};
+	Vector2 text_pos = { int(bounds.x + text_size.x / 2.0f), bounds.y + bounds.height };
 	range = new TextEx{ text_pos, text, WHITE };
 
-	bounds.y += bounds.height + int(text_size.y / 4.0f);
-	min_slider = new Slider{ bounds, text_left, text_right, min_val, min_val, max_val };
+	this->text_left = text_left;
+	this->text_right = text_right;
+	this->min_val_range = min_val_range;
+	this->max_val_range = max_val_range;
 
-	bounds.y += bounds.height + bounds.height / 2.0f;
-	max_slider = new Slider{ bounds, text_left, text_right, max_val, min_val, max_val };
-}
+	min_val = min_val_range;
+	max_val = max_val_range;
 
-RangeSlider::~RangeSlider() {
-	delete range;
-	delete min_slider;
-	delete max_slider;
+	old_min = this->min_val;
+	old_max = this->max_val;
 }
 
 void RangeSlider::draw() {
-	if (min_slider->is_updated()) {
+	if (old_min != min_val) {
 		updated = true;
-		int min_val = min_slider->get_val();
-		int max_val = max_slider->get_val();
+		if (max_val < min_val) { max_val = min_val; }
 
-		if (max_val < min_val) {
-			max_slider->set_val(min_val);
-		}
-
-		string text = "[ ";
-		text += to_string(min_val);
-		text += " ... ";
-		text += to_string(max_val);
-		text += " ]";
-		range->set_text(text);
-
-		min_slider->update();
+		adjust_text(min_val, max_val);
+		old_min = min_val;
 	}
 
-	if (max_slider->is_updated()) {
+	if (old_max != max_val) {
 		updated = true;
-		int min_val = min_slider->get_val();
-		int max_val = max_slider->get_val();
+		if (min_val > max_val) { min_val = max_val; }
 
-		if (min_val > max_val) {
-			min_slider->set_val(max_val);
-		}
-
-		string text = "[ ";
-		text += to_string(min_val);
-		text += " ... ";
-		text += to_string(max_val);
-		text += " ]";
-		range->set_text(text);
-
-		max_slider->update();
+		adjust_text(min_val, max_val);
+		old_max = max_val;
 	}
 
+	float min_valf = min_val;
+	GuiSlider(bounds_min, text_left.c_str(), text_right.c_str(), &min_valf, min_val_range, max_val_range);
+	min_val = min_valf;
+
+	float max_valf = max_val;
+	GuiSlider(bounds_max, text_left.c_str(), text_right.c_str(), &max_valf, min_val_range, max_val_range);
+	max_val = max_valf;
 	range->draw();
-	min_slider->draw();
-	max_slider->draw();
+}
+
+void RangeSlider::adjust_text(int min_val, int max_val) {
+	string text = "[ ";
+	text += to_string(min_val);
+	text += " ... ";
+	text += to_string(max_val);
+	text += " ]";
+
+	range->set_text(text);
+}
+
+void TextBox::draw() {
+	Color border_color = GetColor(GuiGetStyle(TEXTBOX, BORDER_COLOR_NORMAL));
+	Color bg_color     = GetColor(GuiGetStyle(TEXTBOX, BASE_COLOR_NORMAL));
+
+	Vector2 mouse_pos = GetMousePosition();
+	if (CheckCollisionPointRec(mouse_pos, bounds)) {
+		border_color = GetColor(GuiGetStyle(TEXTBOX, BORDER_COLOR_FOCUSED));
+		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) { edit_mode = !edit_mode; }
+	}
+	else {
+		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) { edit_mode = false; }
+	}
+
+	if (edit_mode) {
+		border_color = GetColor(GuiGetStyle(TEXTBOX, BORDER_COLOR_PRESSED));
+		bg_color	 = GetColor(GuiGetStyle(TEXTBOX, BASE_COLOR_PRESSED));
+
+		int key = GetCharPressed();
+		if (key >= 32) {
+			int utf8Size = 0;
+			const char* utf8 = CodepointToUTF8(key, &utf8Size);
+
+			int text_width = MeasureTextEx(font, text.c_str(), 16.0f, 0.0f).x + 6.0f;
+			int char_width = MeasureTextEx(font, utf8, 16.0f, 0.0f).x;
+
+			text_width += char_width;
+			if (text_width < bounds.width) {
+
+				text += utf8;
+				key = GetCharPressed();
+			}
+		}
+
+		if (IsKeyPressed(KEY_BACKSPACE) && !text.empty()) {
+			size_t len = text.size();
+			while (len > 0 && ((text[len - 1] & 0xC0) == 0x80)) {
+				len--;
+			}
+
+			if (len > 0) { len--; } // remove leading bit
+			text.resize(len);
+		}
+
+		if (IsKeyPressed(KEY_ENTER)) { edit_mode = false; }
+	}
+
+	DrawRectangleRec(bounds, bg_color);
+	DrawRectangleLinesEx(bounds, 1.0f, border_color);
+
+	int text_width = MeasureTextEx(font, text.c_str(), 16.0f, 0.0f).x;
+
+	Vector2 line_start = { bounds.x + text_width + 6.0f, bounds.y + 3.0f };
+	Vector2 line_end   = { bounds.x + text_width + 6.0f, bounds.y + bounds.height - 3.0f };
+
+	if (edit_mode) { DrawLineEx(line_start, line_end, 2.0f, border_color); }
+
+	Vector2 text_pos = { bounds.x + 5.0f,  bounds.y + 3.0f };
+	DrawTextEx(font, text.c_str(), text_pos, 16.0f, 0.0f, border_color);
+}
+
+template<>
+void Slider<float>::draw() {
+	GuiSlider(bounds, text_left.c_str(), text_right.c_str(), &val, min_val, max_val);
+
+	Font font = GuiGetFont();
+	Color color = GetColor(GuiGetStyle(DEFAULT, TEXT_COLOR_NORMAL));
+	DrawTextEx(font, val_str.c_str(), val_pos, font.baseSize, 0.0f, color);
+}
+
+template<>
+void Slider<int>::draw() {
+	float val_f = val;
+	GuiSlider(bounds, text_left.c_str(), text_right.c_str(), &val_f, min_val, max_val);
+	val = val_f;
+
+	Font font = GuiGetFont();
+	Color color = GetColor(GuiGetStyle(DEFAULT, TEXT_COLOR_NORMAL));
+	DrawTextEx(font, val_str.c_str(), val_pos, font.baseSize, 0.0f, color);
+}
+
+template<>
+void Slider<float>::update() {
+	Font font = GuiGetFont();
+
+	val_str = "[ ";
+	val_str += to_string(val);
+	val_str.erase(val_str.end() - 4, val_str.end());
+	val_str += " ]";
+
+	Vector2 text_size = MeasureTextEx(font, val_str.c_str(), font.baseSize, 0.0f);
+	val_pos = { round(bounds.x + (bounds.width - text_size.x) / 2.0f), round(bounds.y + bounds.height) };
+
+	old_val = val;
+}
+
+template<>
+void Slider<int>::update() {
+	Font font = GuiGetFont();
+
+	val_str = "[ ";
+	val_str += to_string(val);
+	val_str += " ]";
+
+	Vector2 text_size = MeasureTextEx(font, val_str.c_str(), font.baseSize, 0.0f);
+	val_pos = { round(bounds.x + (bounds.width - text_size.x) / 2.0f), round(bounds.y + bounds.height) };
+
+	old_val = val;
 }
