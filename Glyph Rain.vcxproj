@@ -133,15 +133,18 @@
     <ClCompile Include="Glyphs.cpp" />
     <ClCompile Include="Gui.cpp" />
     <ClCompile Include="gui_elements.cpp" />
+    <ClCompile Include="ImageInput.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="raylib_raygui.cpp" />
     <ClCompile Include="utils.cpp" />
     <ClCompile Include="win32_dialog.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Cell.h" />
     <ClInclude Include="Glyphs.h" />
     <ClInclude Include="Gui.h" />
     <ClInclude Include="gui_elements.h" />
+    <ClInclude Include="ImageInput.h" />
     <ClInclude Include="raylib_raygui.h" />
     <ClInclude Include="utils.h" />
     <ClInclude Include="win32_dialog.h" />

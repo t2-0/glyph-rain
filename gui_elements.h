@@ -48,13 +48,8 @@ public:
 
 	void draw() { clicked_b = GuiButton(bounds, text.c_str()); }
 
-	bool clicked() {
-		if (clicked_b) {
-			clicked_b = false;
-			return true;
-		}
-		return false;
-	}
+	bool clicked() { return clicked_b; }
+	void click()   { clicked_b = false; }
 private:
 	Rectangle bounds = { };
 	string text;

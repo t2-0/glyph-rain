@@ -1,5 +1,4 @@
 #include "Gui.h"
-#include "utils.h"
 #include "win32_dialog.h"
 
 int get_text_x(float slider_x, float slider_width, string text) {
@@ -22,51 +21,6 @@ Color get_styled_color(Color style_color, Color color) {
 	}
 
 	return color_custom;
-}
-
-GlyphImagePreview::GlyphImagePreview(Rectangle bounds) : bounds{ bounds } {
-	float pos_x = bounds.x + bounds.width * 0.1f;
-	float pos_y = bounds.y + bounds.height * 0.1f;
-	position = { pos_x, pos_y };
-
-	float width = bounds.width * 0.8f;
-	float height = bounds.height * 0.8f;
-	size = { width, height };
-}
-
-void GlyphImagePreview::draw() {
-	Color color_rec = GetColor(GuiGetStyle(BUTTON, BASE_COLOR_NORMAL));
-	Color color_lines = GetColor(GuiGetStyle(BUTTON, BORDER_COLOR_NORMAL));
-	Color color_circle = GetColor(GuiGetStyle(DEFAULT, TEXT_COLOR_NORMAL));
-
-	DrawRectangleRec(bounds, color_rec);
-	DrawRectangleLinesEx(bounds, 1.0f, color_lines);
-	for (auto [x, y] : points) {
-		DrawCircle(x, y, 1.0f, color_circle);
-	}
-}
-
-void GlyphImagePreview::update_points() {
-	HWND hwnd = (HWND)GetWindowHandle();
-	file_name = load_file(hwnd);
-
-	Image image = LoadImage(file_name.c_str());
-	ImageResize(&image, size.x, size.y);
-
-	points.clear();
-	int step = 3;
-	Color* pixels = LoadImageColors(image);
-	for (int y = 0; y < image.height; y += step) {
-		for (int x = 0; x < image.width; x += step) {
-			Color c = pixels[y * image.width + x];
-			float brightness = 0.299f * c.r + 0.587f * c.g + 0.114f * c.b;
-
-			if (brightness > 128.0f) {
-				points.push_back({ position.x + x, position.y + y });
-			}
-		}
-	}
-	UnloadImageColors(pixels);
 }
 
 Gui::Gui() {
@@ -103,30 +57,30 @@ Gui::Gui() {
 	text_x = get_text_x(slider_x, slider_width, text);
 
 	column_amount_text = make_unique<TextEx>(Vector2{ text_x, 210.0f }, text.c_str(), text_color);
-	column_amount = make_unique<Slider<int>>(Rectangle{ slider_x, 230.0f, slider_width, slider_height }, "10", "200", 105, 10, 200);
+	column_amount = make_unique<Slider<int>>(Rectangle{ slider_x, 230.0f, slider_width, slider_height }, "0", "200", 100, 0, 200);
 
 	text = "Column Size";
 	text_x = get_text_x(slider_x, slider_width, text);
 
 	column_size_text = make_unique<TextEx>(Vector2{ text_x, 270.0f }, text.c_str(), text_color);
-	column_size = make_unique<RangeSlider>(Rectangle{ slider_x, 290.0f, slider_width, slider_height }, "2", "100", 2.0f, 100.0f);
+	column_size = make_unique<RangeSlider>(Rectangle{ slider_x, 290.0f, slider_width, slider_height }, "0", "100", 0, 100);
 	
 	text = "Input";
 	text_x = get_text_x(slider_x, slider_width, text);
 
-	unique_ptr<Font> merged_font = merge_noto_fonts(16);
 	input_text = make_unique<TextEx>(Vector2{ text_x, 365.0f }, text.c_str(), text_color);
-	input = make_unique<TextBox>(Rectangle{ slider_x - 20.0f, 385.0f, 160.0f, 20.0f }, *merged_font);
-	image_preview = make_unique<GlyphImagePreview>(Rectangle{ slider_x - 20.0f, 415.0f, 160.0f, 160.0f });
+	ascii_preview = make_unique<ASCIIPreview>(Rectangle{ slider_x - 20.0f, 388.0f, 160.0f, 160.0f }, Vector2{ slider_x - 10.0f, 396.0f }, 140, 140);
 
-	load_btn = make_unique<Button>(Rectangle{ slider_x - 20.0f, 580.0f, 60.0f, 25.0f }, "Load");
-	remove_btn = make_unique<Button>(Rectangle{ slider_x - 20.0f,610.0f, 60.0f,25.0f }, "Remove");
-	fill_btn = make_unique<Button>(Rectangle { slider_x + 80.0f, 580.0f, 60.0f, 25.0f }, "Fill");
-	clear_btn = make_unique<Button>(Rectangle{ slider_x + 80.0f, 610.0f, 60.0f, 25.0f }, "Clear");
+	keep_colors = make_unique<Toggle>(Rectangle{ slider_x + 115.0f, 555.0f, 25.0f, 25.0f }, "");
+	keep_label = make_unique<TextEx>(Vector2{ slider_x - 20.0f, 558.0f }, "Keep colors", text_color);
+	load_btn = make_unique<Button>(Rectangle{ slider_x - 20.0f, 585.0f, 70.0f, 25.0f }, "Load");
+	unload_btn = make_unique<Button>(Rectangle{ slider_x - 20.0f,615.0f, 70.0f,25.0f }, "Unload");
+	show_btn = make_unique<Button>(Rectangle{ slider_x + 70.0f, 585.0f, 70.0f, 25.0f }, "Show");
+	hide_btn = make_unique<Button>(Rectangle{ slider_x + 70.0f, 615.0f, 70.0f, 25.0f }, "Hide");
 
 	Color style_color = GetColor(GuiGetStyle(DEFAULT, TEXT_COLOR_NORMAL));
 	vector<Color> colors_v;
-	vector<Color> colors_orig = { style_color, RED, BLUE, YELLOW, GRAY, PURPLE };
+	vector<Color> colors_orig = { style_color, RED, BLUE, YELLOW, PURPLE, RAYWHITE };
 	for (int i = 0; i < colors_orig.size(); i++) {
 		Color color_custom = get_styled_color(style_color, colors_orig[i]);
 		colors_v.push_back(color_custom);
@@ -190,13 +144,15 @@ void Gui::draw() {
 	column_amount->draw();
 
 	input_text->draw();
-	input->draw();
-	image_preview->draw();
+	ascii_preview->draw(is_keep_active(), get_head_region());
 
 	load_btn->draw();
-	remove_btn->draw();
-	fill_btn->draw();
-	clear_btn->draw();
+	unload_btn->draw();
+	show_btn->draw();
+	hide_btn->draw();
+
+	keep_colors->draw();
+	keep_label->draw();
 
 	colors->draw();
 }
@@ -204,9 +160,10 @@ void Gui::draw() {
 void Gui::update() {
 	if (colors->is_updated()) {
 		colors->update();
+
 		Color color_active = colors->get_active_color();
 		int active = colors->get_active();
-
+		
 		for (int i = 0; i < style_colors[active].size(); i++) {
 			GuiSetStyle(style_colors[active][i].control, style_colors[active][i].property, ColorToInt(style_colors[active][i].color));
 		}
@@ -218,13 +175,18 @@ void Gui::update() {
 		column_size_text->set_color(color_active);
 		column_size->set_text_color(color_active);
 		input_text->set_color(color_active);
+		keep_label->set_color(color_active);
 	}
 
-	if (load_btn->clicked())   { image_preview->update_points(); }
-	if (remove_btn->clicked()) { image_preview->clear_points(); }
+	if (load_btn->clicked())   {
+		HWND hwnd = (HWND)GetWindowHandle();
+		ascii_preview->extract(load_file(hwnd));
+	}
+	if (unload_btn->clicked()) { ascii_preview->clear(); }
 
 	if (column_speed->is_updated()) { column_speed->update(); }
 	if (glyph_speed->is_updated())  { glyph_speed->update(); }
 	if (head_region->is_updated())  { head_region->update(); }
 	if (column_amount->is_updated()) { column_amount->update(); }
+	if (keep_colors->is_updated()) { keep_colors->update(); }
 }
