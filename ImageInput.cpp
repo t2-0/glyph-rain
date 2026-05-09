@@ -1,11 +1,14 @@
 #include "ImageInput.h"
 #include "utils.h"
 
+
+
 int ASCIIRenderer::step = 0;
 
-void ASCIIRenderer::update_cells(Image image) {
+void ASCIIRenderer::update_cells(const Image& image) {
 	cells.clear();
 	Color* pixels = LoadImageColors(image);
+	if (!pixels) { return; }
 
 	for (int y = 0; y < rows; y += step) {
 		for (int x = 0; x < cols; x += step) {
@@ -27,14 +30,6 @@ void ASCIIRenderer::update_cells(Image image) {
 	}
 
 	UnloadImageColors(pixels);
-}
-
-void ASCIIRenderer::extract(string file_name) {
-	Image image = LoadImage(file_name.c_str());
-	ImageResize(&image, 500, 500);
-
-	this->file_name = file_name;
-	update_cells(image);
 }
 
 void ASCIIRenderer::draw(bool keep_colors, float head_region) {

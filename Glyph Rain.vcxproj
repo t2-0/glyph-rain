@@ -71,7 +71,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>include;$(IncludePath)</IncludePath>
+    <IncludePath>include;style;$(IncludePath)</IncludePath>
     <LibraryPath>lib\raylib\Debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -137,6 +137,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="raylib_raygui.cpp" />
     <ClCompile Include="utils.cpp" />
+    <ClCompile Include="web.cpp" />
     <ClCompile Include="win32_dialog.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -147,6 +148,7 @@
     <ClInclude Include="ImageInput.h" />
     <ClInclude Include="raylib_raygui.h" />
     <ClInclude Include="utils.h" />
+    <ClInclude Include="web.h" />
     <ClInclude Include="win32_dialog.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

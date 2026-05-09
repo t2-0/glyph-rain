@@ -106,7 +106,7 @@ RangeSlider::RangeSlider(Rectangle bounds, string text_left, string text_right, 
 	Font font = TextEx::get_font();
 	Vector2 text_size = MeasureTextEx(font, text.c_str(), font.baseSize, 0.0f);
 
-	Vector2 text_pos = { int(bounds.x + text_size.x / 2.0f), bounds.y + bounds.height };
+	Vector2 text_pos = { bounds.x + text_size.x / 2.0f, bounds.y + bounds.height };
 	range = new TextEx{ text_pos, text, WHITE };
 
 	this->text_left = text_left;

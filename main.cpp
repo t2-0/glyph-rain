@@ -1,13 +1,12 @@
 ﻿#include "raylib_raygui.h"
 #include "Glyphs.h"
-#include "GUI.h"
 #include "ImageInput.h"
 
 int main() {
     SetConfigFlags(FLAG_WINDOW_UNDECORATED);
-    InitWindow(1280, 1024, "Glyph Rain");
-    string file = "styles/terminal/style_terminal.rgs";
-    GuiLoadStyle(file.c_str());
+    InitWindow(896, 672, "Glyph Rain");
+
+    GuiLoadStyleTerminalW();
     
     Font font = GetFontDefault();
     Glyph::set_font(font);
@@ -25,11 +24,12 @@ int main() {
     }
 
     Gui gui;
-    ImageInput input_image = { { 40.0f, 25.0f }, 980, 980 };
+    ImageInput image_input = { { 40.0f, 25.0f }, 620, 620 };
 
     SetTargetFPS(60);
     while (!WindowShouldClose()) {
-        gui.update();
+        gui.update(image_input);
+
         int target_amount = gui.get_cols_amount();
         if (target_amount > cols.size()) {
             int size = GetRandomValue(gui.get_min_col_size(), gui.get_max_col_size());
@@ -52,10 +52,9 @@ int main() {
             }
         }
 
-        if (gui.load_clicked())  { input_image.load(gui.get_file_name()); }
-        if (gui.unload_cliked()) { input_image.unload(); }
-        if (gui.show_clicked())  { input_image.show(); }
-        if (gui.hide_clicked())  { input_image.hide(); }
+        if (gui.unload_cliked()) { image_input.unload(); }
+        if (gui.show_clicked())  { image_input.show(); }
+        if (gui.hide_clicked())  { image_input.hide(); }
 
         BeginDrawing();
         ClearBackground(BLACK);
@@ -67,8 +66,9 @@ int main() {
             it->draw();
         }
         if (gui.is_size_updated()) { gui.update_size(); }
-        input_image.draw(gui.is_keep_active(), gui.get_head_region());
+        image_input.draw(gui.is_keep_active(), gui.get_head_region());
 
+        DrawFPS(10, 10);
         EndDrawing();
     }
 

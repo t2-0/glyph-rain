@@ -23,7 +23,7 @@ public:
 	Gui();
 
 	void draw();
-	void update();
+	void update(ImageInput& image_input);
 
 	float get_column_speed() const { return column_speed->get_val(); }
 	float get_glyph_speed()  const { return glyph_speed->get_val(); }
@@ -40,8 +40,6 @@ public:
 	bool hide_clicked() { bool b = hide_btn->clicked(); hide_btn->click(); return b; }
 	bool load_clicked() { bool b = load_btn->clicked(); load_btn->click(); return b; }
 	bool unload_cliked() { bool b = unload_btn->clicked(); unload_btn->click(); return b; }
-
-	string get_file_name() { return ascii_preview->get_file_name(); }
 private:
 	unique_ptr<Panel> panel;
 

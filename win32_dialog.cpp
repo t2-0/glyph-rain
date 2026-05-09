@@ -1,4 +1,5 @@
 #include "win32_dialog.h"
+
 #define WIN32_LEAN_AND_MEAN
 
 #include <windows.h>
@@ -6,8 +7,6 @@
 
 #include <sstream>
 #include <fstream>
-
-using namespace std;
 
 string load_file(HWND owner) {
     HRESULT hr = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
@@ -19,13 +18,12 @@ string load_file(HWND owner) {
 
         if (SUCCEEDED(hr)) {
             COMDLG_FILTERSPEC types[] = {
-                { L"Image Files", L"*.png;*.jpg;*.jpeg;*.bmp;*.gif" },
+                { L"Image Files", L"*.png;*.jpg;*.jpeg;" },
                 { L"PNG Files",   L"*.png" }, 
                 { L"JPEG Files",  L"*.jpg;*.jpeg" },
-                { L"All Files",   L"*.*" }
             };
 
-            file_open->SetFileTypes(4, types);
+            file_open->SetFileTypes(3, types);
             hr = file_open->Show(owner);
             if (SUCCEEDED(hr)) {
                 IShellItem* item = nullptr;

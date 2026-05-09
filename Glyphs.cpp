@@ -48,8 +48,6 @@ GlyphColumn::GlyphColumn(int size, Vector2 position, Font font) {
 }
 
 void GlyphColumn::draw() {
-	Color column_color = GetColor(GuiGetStyle(DEFAULT, TEXT_COLOR_NORMAL));
-
 	Vector2 glyph_position = position;
 	float tail_region = 1.0f - head_region;
 
