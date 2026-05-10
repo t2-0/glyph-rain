@@ -3,9 +3,6 @@
 #include "image_input/ImageInput.h"
 #include "gui_elements.h"
 #include <memory>
-#include <iostream>
-
-using namespace std;
 
 using std::unique_ptr;
 using std::make_unique;
@@ -18,6 +15,20 @@ struct StyleEntry {
 	Color color;
 };
 
+// Main graphical user interface controller.
+//
+// Responsibilities:
+// - Manage all GUI widgets and layout
+// - Provide access to configurable application settings
+// - Handle image loading/unloading
+// - Synchronize GUI state with application systems
+// - Manage runtime theme/style customization
+//
+// Notes:
+// - Supports both desktop and web file loading flows
+// - Uses raygui-based controls and styling
+// - GUI values are exposed through lightweight getters
+// - Color themes dynamically modify raygui style properties
 class Gui {
 public:
 	Gui();

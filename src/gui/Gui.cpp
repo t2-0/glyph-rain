@@ -239,5 +239,4 @@ void Gui::update(ImageInput& image_input) {
 	if (head_region->is_updated()) { head_region->update(); }
 	if (column_amount->is_updated()) { column_amount->update(); }
 	if (keep_colors->is_updated()) { keep_colors->update(); }
-
 }

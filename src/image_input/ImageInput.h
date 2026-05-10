@@ -2,10 +2,20 @@
 #include <vector>
 #include "raylib_raygui.h"
 #include "cell/Cell.h"
-#include<iostream>
 
-using namespace std;
-
+// Converts image data into ASCII-style rendered cells.
+//
+// Responsibilities:
+// - Sample image pixels
+// - Convert brightness into ASCII characters
+// - Store generated ASCII cells
+// - Render ASCII image representation
+//
+// Notes:
+// - Rendering resolution is controlled by step
+// - Supports colored and monochrome rendering modes
+// - Uses brightness ramp for ASCII character selection
+// - hide flag disables rendering without clearing data
 class ASCIIRenderer {
 public:
 	ASCIIRenderer(Vector2 pos, int cols, int rows) : position{ pos }, cols{ cols }, rows{ rows } {}
@@ -25,12 +35,21 @@ protected:
 	int cols = 0;
 	int rows = 0;
 	bool hide = true;
-
 	Font font = GetFontDefault();
 
 	static int step;
 };
 
+// Specialized ASCII renderer with preview bounds visualization.
+//
+// Responsibilities:
+// - Render ASCII image preview
+// - Draw preview boundary/frame
+//
+// Notes:
+// - Inherits all ASCII generation/rendering behavior
+// - Preview is always visible by default
+// - Adds visual border around render region
 class ASCIIPreview : public ASCIIRenderer {
 public:
 	ASCIIPreview(Rectangle bounds, Vector2 pos, int cols, int rows)
@@ -40,6 +59,16 @@ private:
 	Rectangle bounds;
 };
 
+// High-level wrapper for ASCII image rendering.
+//
+// Responsibilities:
+// - Load images into ASCII representation
+// - Control renderer visibility
+//
+// Notes:
+// - Internally uses ASCIIRenderer
+// - Acts as simplified interface for image-based ASCII rendering
+// - Image data itself is not stored after conversion
 class ImageInput {
 public:
 	ImageInput(Vector2 pos, int cols, int rows) : renderer{ pos, cols, rows } {}

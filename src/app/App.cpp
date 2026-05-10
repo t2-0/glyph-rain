@@ -62,4 +62,3 @@ void App::update_cols() {
         }
     }
 }
-

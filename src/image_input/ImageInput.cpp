@@ -5,12 +5,13 @@ int ASCIIRenderer::step = 0;
 
 void ASCIIRenderer::update_cells(const Image& image) {
 	cells.clear();
+
 	Color* pixels = LoadImageColors(image);
 	if (!pixels) { return; }
 
 	for (int y = 0; y < rows; y += step) {
 		for (int x = 0; x < cols; x += step) {
-			int img_x = x * (image.width - 1) / (cols - 1);
+			int img_x = x * (image.width  - 1) / (cols - 1);
 			int img_y = y * (image.height - 1) / (rows - 1);
 
 			Color color = pixels[img_y * image.width + img_x];

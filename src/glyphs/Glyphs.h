@@ -2,22 +2,27 @@
 #include "raylib_raygui.h"
 #include "gui/Gui.h"
 #include <vector>
-#include <algorithm>
-#include <unordered_set>
 
 using std::string;
 using std::vector;
-using std::equal_range;
-using std::lower_bound;
-using std::upper_bound;
 
+// Represents a single animated glyph.
+//
+// Responsibilities:
+// - Store and render a character
+// - Animate symbol changes over time
+// - Handle randomized update intervals
+//
+// Notes:
+// - Uses shared static font for all glyphs
+// - Characters are randomized using ASCII uppercase letters
+// - Update speed is affected by global_speed multiplier
 class Glyph {
 public:
 	Glyph(char c) : c{ c } { }
 
 	void draw(Vector2 position, Color color) const;
 	void update(float global_speed);
-	char get_char() { return c[0]; }
 
 	static void set_font(Font font_n) { font = font_n; }
 protected:
@@ -28,6 +33,16 @@ private:
 	float interval = 0.5f;
 };
 
+// Represents a vertical falling glyph rain column.
+//
+// Responsibilities:
+// - Store and manage a sequence of glyphs
+// - Handle movement and screen wrapping
+// - Render glyphs with head/tail fading effect
+//
+// Notes:
+// - Column speed and position are randomized
+// - head_region controls brightness/fade distribution
 class GlyphColumn {
 public:
 	GlyphColumn(int size, Vector2 position, Font font);

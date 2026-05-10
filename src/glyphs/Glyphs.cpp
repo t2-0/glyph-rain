@@ -1,13 +1,10 @@
 ﻿#include "Glyphs.h"
 #include "utils/utils.h"
 #include <stdlib.h>  
-#include <iostream>
 
 Font Glyph::font;
 
 float GlyphColumn::head_region = 0.2f;
-
-using namespace std;
 
 void Glyph::draw(Vector2 position, Color color) const {
 	DrawTextEx(font, c, position, font.baseSize, 0.0f, color);
@@ -52,7 +49,7 @@ void GlyphColumn::draw() {
 	float tail_region = 1.0f - head_region;
 
 	for (int i = 0; i < column.size(); i++) {
-		Color text_color = GetColor(GuiGetStyle(DEFAULT, TEXT_COLOR_NORMAL));
+		Color text_color  = GetColor(GuiGetStyle(DEFAULT, TEXT_COLOR_NORMAL));
 		Color glyph_color = adjust_color(text_color, i, column.size(), tail_region, head_region);
 
 		column[i].draw(glyph_position, glyph_color);
@@ -74,7 +71,7 @@ void GlyphColumn::update(const Gui& gui) {
 	position.y += speed * dt * gui.get_column_speed();
 
 	if (position.y >= GetScreenHeight()) {
-		// smooth resizing
+		// smooth column resizing
 		if (column.size() < target_size) {
 			for (int i = 0; i < target_size; i++) {
 				int codepoint = GetRandomValue(65, 90);

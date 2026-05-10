@@ -3,6 +3,11 @@
 #include "glyphs/Glyphs.h"
 #include "image_input/ImageInput.h"
 
+// Main application controller.
+//
+// - Introduced to simplify Web build flow
+// - Removes need for ASYNCIFY-based control flow
+// - Shared between desktop and web builds
 class App {
 public:
     App(Font font);
