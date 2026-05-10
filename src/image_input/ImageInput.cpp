@@ -1,7 +1,5 @@
-#include "ImageInput.h"
-#include "utils.h"
-
-
+#include "image_input/ImageInput.h"
+#include "utils/utils.h"
 
 int ASCIIRenderer::step = 0;
 

@@ -18,6 +18,28 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\glyphs\Glyphs.cpp" />
+    <ClCompile Include="src\gui\Gui.cpp" />
+    <ClCompile Include="src\gui\gui_elements.cpp" />
+    <ClCompile Include="src\image_input\ImageInput.cpp" />
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\raylib_raygui.cpp" />
+    <ClCompile Include="src\utils\utils.cpp" />
+    <ClCompile Include="src\utils\web.cpp" />
+    <ClCompile Include="src\utils\win32_dialog.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\cell\Cell.h" />
+    <ClInclude Include="src\glyphs\Glyphs.h" />
+    <ClInclude Include="src\gui\Gui.h" />
+    <ClInclude Include="src\gui\gui_elements.h" />
+    <ClInclude Include="src\image_input\ImageInput.h" />
+    <ClInclude Include="src\raylib_raygui.h" />
+    <ClInclude Include="src\utils\utils.h" />
+    <ClInclude Include="src\utils\web.h" />
+    <ClInclude Include="src\utils\win32_dialog.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
@@ -71,8 +93,14 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>include;style;$(IncludePath)</IncludePath>
+    <IncludePath>include;style;src/;$(IncludePath)</IncludePath>
     <LibraryPath>lib\raylib\Debug;$(LibraryPath)</LibraryPath>
+    <OutDir>$(ProjectDir)build\Desktop\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(ProjectDir)build\Desktop\$(Configuration)\</OutDir>
+    <IncludePath>include;src;style;$(IncludePath)</IncludePath>
+    <LibraryPath>lib\raylib\Release;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -123,34 +151,15 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>raylib.lib;winmm.lib;gdi32.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="Glyphs.cpp" />
-    <ClCompile Include="Gui.cpp" />
-    <ClCompile Include="gui_elements.cpp" />
-    <ClCompile Include="ImageInput.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="raylib_raygui.cpp" />
-    <ClCompile Include="utils.cpp" />
-    <ClCompile Include="web.cpp" />
-    <ClCompile Include="win32_dialog.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Cell.h" />
-    <ClInclude Include="Glyphs.h" />
-    <ClInclude Include="Gui.h" />
-    <ClInclude Include="gui_elements.h" />
-    <ClInclude Include="ImageInput.h" />
-    <ClInclude Include="raylib_raygui.h" />
-    <ClInclude Include="utils.h" />
-    <ClInclude Include="web.h" />
-    <ClInclude Include="win32_dialog.h" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

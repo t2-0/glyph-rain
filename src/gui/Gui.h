@@ -1,6 +1,6 @@
 #pragma once
 #include "raylib_raygui.h"
-#include "ImageInput.h"
+#include "image_input/ImageInput.h"
 #include "gui_elements.h"
 #include <memory>
 #include <iostream>

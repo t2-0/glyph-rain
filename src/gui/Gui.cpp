@@ -1,9 +1,9 @@
 #include "Gui.h"
 
 #ifdef _WIN32
-	#include "win32_dialog.h"
+	#include "utils/win32_dialog.h"
 #elif __EMSCRIPTEN__
-	#include "web.h"
+	#include "utils/web.h"
 	
 	Image image_web;
 	bool image_loaded_b = false;
@@ -12,6 +12,7 @@
 		void image_loaded(unsigned char* data, int size, const char* file_name)	{
 		const char* ext = GetFileExtension(file_name);
 
+		TraceLog(LOG_INFO, ext);
 		image_web = LoadImageFromMemory(ext, data, size);
 		ImageResize(&image_web, 500, 500);
 

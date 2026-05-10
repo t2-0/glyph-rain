@@ -1,6 +1,6 @@
 #pragma once
 #include "raylib_raygui.h"
-#include "Gui.h"
+#include "gui/Gui.h"
 #include <vector>
 #include <algorithm>
 #include <unordered_set>

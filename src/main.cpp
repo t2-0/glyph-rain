@@ -1,6 +1,6 @@
 ﻿#include "raylib_raygui.h"
-#include "Glyphs.h"
-#include "ImageInput.h"
+#include "glyphs/Glyphs.h"
+#include "image_input/ImageInput.h"
 
 int main() {
     SetConfigFlags(FLAG_WINDOW_UNDECORATED);

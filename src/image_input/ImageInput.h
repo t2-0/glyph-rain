@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 #include "raylib_raygui.h"
-#include "Cell.h"
+#include "cell/Cell.h"
 #include<iostream>
 
 using namespace std;
