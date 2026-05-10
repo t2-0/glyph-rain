@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\app\App.cpp" />
     <ClCompile Include="src\glyphs\Glyphs.cpp" />
     <ClCompile Include="src\gui\Gui.cpp" />
     <ClCompile Include="src\gui\gui_elements.cpp" />
@@ -30,6 +31,7 @@
     <ClCompile Include="src\utils\win32_dialog.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\app\App.h" />
     <ClInclude Include="src\cell\Cell.h" />
     <ClInclude Include="src\glyphs\Glyphs.h" />
     <ClInclude Include="src\gui\Gui.h" />

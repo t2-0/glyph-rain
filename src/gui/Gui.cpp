@@ -12,7 +12,6 @@
 		void image_loaded(unsigned char* data, int size, const char* file_name)	{
 		const char* ext = GetFileExtension(file_name);
 
-		TraceLog(LOG_INFO, ext);
 		image_web = LoadImageFromMemory(ext, data, size);
 		ImageResize(&image_web, 500, 500);
 
@@ -43,7 +42,7 @@ Color get_styled_color(Color style_color, Color color) {
 }
 
 Gui::Gui() {
-	float screen_width = GetScreenWidth();
+	float screen_width  = GetScreenWidth();
 	float screen_height = GetScreenHeight();
 
 	float panel_width = 220.0f;
