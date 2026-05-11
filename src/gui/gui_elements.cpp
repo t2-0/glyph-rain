@@ -93,6 +93,7 @@ bool ColorGroup::is_updated() {
 
 void Panel::draw() {
 	Color color_base = Fade(GetColor(GuiGetStyle(DEFAULT, BASE_COLOR_NORMAL)), 0.5f);
+
 	DrawRectangleRec(bounds, color_base);
 	DrawRectangleLinesEx(bounds, 1.0f, WHITE);
 }
