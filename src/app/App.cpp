@@ -17,8 +17,6 @@ void App::draw() {
     BeginDrawing();
     ClearBackground(BLACK);
 
-    gui.draw();
-
     for (auto it = cols.begin(); it != cols.end(); it++) {
         it->update(gui);
         it->draw();
@@ -26,6 +24,7 @@ void App::draw() {
     if (gui.is_size_updated()) { gui.update_size(); }
     image_input.draw(gui.is_keep_active(), gui.get_head_region());
 
+    gui.draw();
     DrawFPS(10, 10);
     EndDrawing();
 }

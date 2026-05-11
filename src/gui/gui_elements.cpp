@@ -91,6 +91,12 @@ bool ColorGroup::is_updated() {
 	return updated;
 }
 
+void Panel::draw() {
+	Color color_base = Fade(GetColor(GuiGetStyle(DEFAULT, BASE_COLOR_NORMAL)), 0.5f);
+	DrawRectangleRec(bounds, color_base);
+	DrawRectangleLinesEx(bounds, 1.0f, WHITE);
+}
+
 RangeSlider::RangeSlider(Rectangle bounds, string text_left, string text_right, int min_val_range, int max_val_range) {
 	string text = "[ ";
 	text += to_string(min_val_range);

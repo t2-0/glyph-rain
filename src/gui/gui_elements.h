@@ -206,7 +206,7 @@ private:
 class Panel {
 public:
 	Panel(Rectangle bounds, const char *text) : bounds{ bounds }, text{ text } { }
-	void draw() { GuiPanel(bounds, text); }
+	void draw();
 private:
 	Rectangle bounds;
 	const char *text;
